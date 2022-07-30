@@ -18,17 +18,17 @@ public class Sucursal {
         this.idSucursal = idSucursal;
     }
 
-    public String getNombresucursal() {
+    public String getNombreSucursal() {
         return nombresucursal;
     }
 
-    public void setNombresucursal(String nombresucursal) {
+    public void setNombreSucursal(String nombresucursal) {
         this.nombresucursal = nombresucursal;
     }
 
     @Override
     public String toString() {
-        return getNombresucursal();
+        return getNombreSucursal();
     }
     
     

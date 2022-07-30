@@ -28,7 +28,7 @@ public class ComboboxSucursal {
             while(rs.next()){
                 sucursal = new Sucursal();
                 sucursal.setIdSucursal(rs.getInt("idSucursal"));
-                sucursal.setNombresucursal(rs.getString("nombreSucursal"));
+                sucursal.setNombreSucursal(rs.getString("nombreSucursal"));
                 mListaSucursales.add(sucursal);
                 
             }

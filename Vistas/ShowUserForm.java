@@ -5,6 +5,8 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 
 public class ShowUserForm extends javax.swing.JDialog {
@@ -21,8 +23,8 @@ public class ShowUserForm extends javax.swing.JDialog {
     }
 
     //1. Crear un metodo que nos permite mostar la informacion que esta en la consola
-    public void recibeDatos(int idEmp, String nombre,String apellidos, String tipoDoc,String Documento, String correo, String sucursal) {
-        System.out.println("sucursal: " +sucursal + "\nnombre: " + nombre + " "+ apellidos + "\ndocumento: " + tipoDoc
+    public void recibeDatos(int idEmp, String nombre, String apellidos, String tipoDoc, String Documento, String correo, String sucursal) {
+        System.out.println("sucursal: " + sucursal + "\nnombre: " + nombre + " " + apellidos + "\ndocumento: " + tipoDoc
                 + " " + "\ncorreo: " + correo);
         txtSucursal.setText(sucursal);
         txtNombre.setText(nombre);
@@ -33,61 +35,66 @@ public class ShowUserForm extends javax.swing.JDialog {
 
     }
 
-    public void ActualizarEmpleado() {
-        //Consultamos el valor que contiene el texfield y lo asigmamos auna variable
-        int idEmp = Integer.parseInt(txtSucursal.getText());
-        String nombre = txtNombre.getText();
-        String apellidos = txtApellidos.getText();
-        String correo = txtCorreo.getText();
-        //Los campos editables son: nombre, apellido, correo
-        if (nombre.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "El nombre del empleado es requerido", "", JOptionPane.WARNING_MESSAGE);
-
-        } else if (apellidos.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Los apellidos del empleado es un campo requerido", "", JOptionPane.WARNING_MESSAGE);
-
-        } else if (correo.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "El correo del empleado es  requerido", "", JOptionPane.WARNING_MESSAGE);
-
-        } else {
-            String query = "UPDATE `empleado` SET `nombreEmp`='"
-                    + nombre
-                    + "',\n" + "`apellidos`='" + apellidos + "',\n"
-                    + "`correo`='" + correo + "' \n"
-                    + "WHERE idEmp = " + idEmp + ";";
-            System.out.println(query);
-            try {
-                conexion = connection.getConnection();
-                st = conexion.createStatement();
-                st.executeUpdate(query);
-
-                JOptionPane.showMessageDialog(this, "El usuario ha sido actualizado con Exito");
-            } catch (SQLException e) {
-                JOptionPane.showMessageDialog(this, "No se pudo actualizar el empleado", "", JOptionPane.ERROR_MESSAGE);
-
+    public void ActualizarEmpleado() throws SQLException {
+        String documento = txtdocumento.getText();
+        String queryIdEmpleado = "SELECT idEmp, FK_idPuestoTrabajo from empleado inner join puestoTrabajo ON(puestoTrabajo.idPuestoTrabajo = empleado.FK_idPuestoTrabajo) where documento = '" + documento + "';";
+        System.out.println(queryIdEmpleado);
+        try {
+            conexion = connection.getConnection();
+            st = connection.createStatement();
+            rs = st.executeQuery(queryIdEmpleado);
+            while (rs.next()) {
+                int idEmpleado = rs.getInt("idEmp");
+                String nombre = txtNombre.getText();
+                String apellidos = txtApellidos.getText();
+                String correo = txtCorreo.getText();
+                if (nombre.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "El nombre del empleado es un campo requerido.", "", JOptionPane.WARNING_MESSAGE);
+                } else if (apellidos.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "El valor del campo apellidos es requerido.", "", JOptionPane.WARNING_MESSAGE);
+                } else if (correo.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "El correo del empleado es un campo requerido.", "", JOptionPane.WARNING_MESSAGE);
+                } else {
+                    String query = "UPDATE `empleado` SET `nombreEmp`='" + nombre + "',`apellidos`='" + apellidos + "',`correo`='" + correo
+                            + "' WHERE `idEmp` = " + idEmpleado + ";";
+                    System.out.println(query);
+                    try {
+                        conexion = connection.getConnection();
+                        st = connection.createStatement();
+                        st.executeUpdate(query);
+                        JOptionPane.showMessageDialog(this, "Se han actualizado los datos del empleado.", "", JOptionPane.INFORMATION_MESSAGE);
+                        this.dispose();
+                    } catch (SQLException e) {
+                        JOptionPane.showMessageDialog(this, "No fue posible actualizar los datos del empleado.", "", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
             }
-            this.dispose();
-
+        } catch (SQLException e) {
+            System.out.println(e);
         }
-
     }
 
     public void EliminarEmpleado() {
-        //1.Concultamos el id del empleado
-        int idEmp = Integer.parseInt(txtSucursal.getText());
-        //2.Validar  si el usuario no ha seleccionado un usuario
-        String query = "DELETE FROM `empleado` WHERE idEmp = " + idEmp + ";";
-        System.out.println(query);
+        String documento = txtdocumento.getText();
+        String queryIdEmpleado = "SELECT idEmp from empleado where documento = '" + documento + "';";
         try {
             conexion = connection.getConnection();
-            st = conexion.createStatement();
-            st.executeUpdate(query);
-            JOptionPane.showMessageDialog(this, "El usuario ha sido eliminado.");
+            st = connection.createStatement();
+            rs = st.executeQuery(queryIdEmpleado);
+            while (rs.next()) {
+                int idEmpleado = rs.getInt("idEmp");
+                String queryEliminar = "DELETE FROM empleado WHERE documento = '" + documento + "'";
+                try {
+                    st.executeUpdate(queryEliminar);
+                    JOptionPane.showMessageDialog(this, "El empleado ha sido eliminado");
+                    this.dispose();
+                } catch (SQLException e) {
+                    JOptionPane.showMessageDialog(this, "El empleado no ha sido eliminado", "", JOptionPane.ERROR_MESSAGE);
+                }
+            }
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, "No se pudo eliminar el empleado", "", JOptionPane.ERROR_MESSAGE);
-
+            System.out.println(e);
         }
-        this.dispose();
     }
 
     @SuppressWarnings("unchecked")
@@ -134,7 +141,6 @@ public class ShowUserForm extends javax.swing.JDialog {
 
         jLabel7.setText("Correo");
 
-        btnActualizar.setIcon(new javax.swing.ImageIcon("C:\\Users\\Usuario\\Documents\\NetBeansProjects\\Reto3_g53EricGarcia\\src\\assets\\confirmIcon.png")); // NOI18N
         btnActualizar.setText("Actualizar");
         btnActualizar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -142,7 +148,6 @@ public class ShowUserForm extends javax.swing.JDialog {
             }
         });
 
-        btnCancelar.setIcon(new javax.swing.ImageIcon("C:\\Users\\Usuario\\Documents\\NetBeansProjects\\Reto3_g53EricGarcia\\src\\assets\\cancelIcon.png")); // NOI18N
         btnCancelar.setText("Cancelar");
         btnCancelar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -150,7 +155,6 @@ public class ShowUserForm extends javax.swing.JDialog {
             }
         });
 
-        btnEliminar.setIcon(new javax.swing.ImageIcon("C:\\Users\\Usuario\\Documents\\NetBeansProjects\\Reto3_g53EricGarcia\\src\\assets\\deleteUser (1).png")); // NOI18N
         btnEliminar.setText("Eliminar");
         btnEliminar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -162,48 +166,48 @@ public class ShowUserForm extends javax.swing.JDialog {
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addContainerGap(54, Short.MAX_VALUE)
-                .addComponent(btnActualizar)
-                .addGap(26, 26, 26)
-                .addComponent(btnEliminar)
-                .addGap(28, 28, 28)
-                .addComponent(btnCancelar)
-                .addContainerGap(54, Short.MAX_VALUE))
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jLabel1))
+                        .addGap(57, 57, 57)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(btnActualizar)
+                                .addGap(26, 26, 26)
+                                .addComponent(btnEliminar)
+                                .addGap(28, 28, 28)
+                                .addComponent(btnCancelar))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel4)
+                                    .addComponent(jLabel6)
+                                    .addComponent(jLabel7)
+                                    .addComponent(jLabel3)
+                                    .addComponent(jLabel5)
+                                    .addComponent(jLabel2))
+                                .addGap(33, 33, 33)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(txtNombre)
+                                    .addComponent(txtApellidos)
+                                    .addComponent(txtTipoDocumento)
+                                    .addComponent(txtdocumento)
+                                    .addComponent(txtCorreo)
+                                    .addComponent(txtSucursal, javax.swing.GroupLayout.PREFERRED_SIZE, 181, javax.swing.GroupLayout.PREFERRED_SIZE)))))
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(107, 107, 107)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel4)
-                            .addComponent(jLabel6)
-                            .addComponent(jLabel7)
-                            .addComponent(jLabel3)
-                            .addComponent(jLabel5)
-                            .addComponent(jLabel2))
-                        .addGap(33, 33, 33)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(txtNombre)
-                            .addComponent(txtApellidos, javax.swing.GroupLayout.DEFAULT_SIZE, 181, Short.MAX_VALUE)
-                            .addComponent(txtTipoDocumento, javax.swing.GroupLayout.DEFAULT_SIZE, 181, Short.MAX_VALUE)
-                            .addComponent(txtdocumento, javax.swing.GroupLayout.DEFAULT_SIZE, 181, Short.MAX_VALUE)
-                            .addComponent(txtCorreo, javax.swing.GroupLayout.DEFAULT_SIZE, 181, Short.MAX_VALUE)
-                            .addComponent(txtSucursal))))
-                .addContainerGap(96, Short.MAX_VALUE))
+                        .addContainerGap()
+                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 164, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(80, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel1)
+                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 86, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
                     .addComponent(txtSucursal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGap(13, 13, 13)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtNombre, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel3))
@@ -223,12 +227,12 @@ public class ShowUserForm extends javax.swing.JDialog {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel7)
                     .addComponent(txtCorreo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 34, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 29, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnActualizar)
                     .addComponent(btnCancelar)
                     .addComponent(btnEliminar))
-                .addGap(22, 22, 22))
+                .addContainerGap())
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -237,8 +241,8 @@ public class ShowUserForm extends javax.swing.JDialog {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -252,7 +256,11 @@ public class ShowUserForm extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnActualizarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnActualizarActionPerformed
-     ActualizarEmpleado();
+        try {
+            ActualizarEmpleado();
+        } catch (SQLException ex) {
+            Logger.getLogger(ShowUserForm.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_btnActualizarActionPerformed
 
     private void btnEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarActionPerformed
@@ -260,7 +268,7 @@ public class ShowUserForm extends javax.swing.JDialog {
     }//GEN-LAST:event_btnEliminarActionPerformed
 
     private void btnCancelarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelarActionPerformed
-    // TODO add your handling code here:
+        // TODO add your handling code here:
     }//GEN-LAST:event_btnCancelarActionPerformed
 
     /**
@@ -328,4 +336,5 @@ public class ShowUserForm extends javax.swing.JDialog {
     void recibeDatos(String sucursal, String nombreEmp, String apellidos, String tipoDocumento, String documento, String correo) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
 }

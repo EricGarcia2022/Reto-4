@@ -37,13 +37,7 @@ public class UserMenu extends javax.swing.JFrame {
 
     private void listarDepartamentos() {
 
-        String query = "SELECT nombreSucursal, nombreDepartamento, CONCAT('Zona','Zona',.',tipoCalle',',numero1,'#No.',numero2,'-',numero3,')\n"
-                +"AS direccion\n"
-                +"FROM direccion\n"
-                +"INNER JOIN sucursal\n"
-                +"WHERE idDireccion = FK_idDireccion\n"
-                +"AND nombreDepartamento\n"
-                +"like '%%' ORDES BY nombreDepartamento";
+        String query = "SELECT nombreSucursal, nombreDepartamento, CONCAT('Zona ', zona, '. ', tipoCalle, ' ', numero1,' #No. ', numero2, ' - ', numero3) AS direccion FROM direccion INNER JOIN sucursal ON direccion.idDireccion = sucursal.FK_idDireccion ORDER BY nombreDepartamento;";
         System.out.println("Entro al metodo listarDepartamentos");
         try {
             connection = conexion.getConnection();
@@ -83,58 +77,44 @@ public class UserMenu extends javax.swing.JFrame {
                 contenidoTablaEmpleados = (DefaultTableModel) tblEmpleados.getModel();
                 //8. Recorremos el resultado de la consulta del query
                 while (rs.next()) {
-                    empleados[0] = rs.getInt("idEmp");
-                    empleados[1] = rs.getString("nombreEmp");
-                    empleados[2] = rs.getString("apellidos");
-                    empleados[3] = rs.getString("tipoDocumento");
-                    empleados[4] = rs.getString("documento");
-                    empleados[5] = rs.getString("correo");
-                    System.out.println("id: " + empleados[0] + ", nombre: "
-                            + empleados[1] + " , apellidos: "
-                            + empleados[2] + ", documento: "
-                            + empleados[3] + " " + empleados[4]
-                            + ", correo: " + empleados[5]);
-                    //9.Creamos una fila   dentro de la tabla para cada elemento que devuelve
-                    //el query
+                    empleados[0] = rs.getString("nombreEmp");
+                    empleados[1] = rs.getString("apellidos");
+                    empleados[2] = rs.getString("tipoDocumento");
+                    empleados[3] = rs.getString("documento");
+                    empleados[4] = rs.getString("correo");
+                    empleados[5] = rs.getString("nombreSucursal");
                     contenidoTablaEmpleados.addRow(empleados);
-
+                    tblEmpleados.setModel(contenidoTablaEmpleados);
                 }
-                tblEmpleados.setModel(contenidoTablaEmpleados);
+                
             } catch (SQLException e) {
-                System.out.println("Error para generar tabla de datos ");
-                System.out.println(e);
-
+                System.out.println("Error");
+               
             }
 
         } else {
-            String queryEncontrar =  "SELECT nombreEmp,apellidos,tipoDocumento,documento,correo, nombreSucursal "
-                    + "FROM empleado INNER JOIN sucursal WHERE empleado.FK_idSucursal = sucursal.idSucursal AND nombreEmp LIKE '%" + txtBuscarEmp + "%' OR apellidos LIKE '%" + txtBuscarEmp + "%'";
+            String queryConsulta =  "SELECT nombreEmp,apellidos,tipoDocumento,documento,correo, nombreSucursal FROM empleado INNER JOIN sucursal WHERE empleado.FK_idSucursal = sucursal.idSucursal AND nombreEmp LIKE '%" + txtBuscarEmp + "%' OR apellidos LIKE '%" + txtBuscarEmp + "%'";
+            System.out.println(queryConsulta);
             try {
                 connection = conexion.getConnection();
                 st = connection.createStatement();
-                rs = st.executeQuery(queryEncontrar);
-                //6. Crear un objeto donde se almacene el resultado de la consulta
+                rs = st.executeQuery(queryConsulta);
                 Object[] empleados = new Object[6];
-                //7. Actualizar la propiedad Model de la tabla 
                 contenidoTablaEmpleados = (DefaultTableModel) tblEmpleados.getModel();
-                //8. Recorremos el resultado de la consulta del query
+              
                 while (rs.next()) {
-                    empleados[0] = rs.getInt("idEmp");
-                    empleados[1] = rs.getString("nombreEmp");
-                    empleados[2] = rs.getString("apellidos");
-                    empleados[3] = rs.getString("tipoDocumento");
-                    empleados[4] = rs.getString("documento");
-                    empleados[5] = rs.getString("correo");
-                    System.out.println("id: " + empleados[0] + ", nombre: " + empleados[1] + " , apellido: " + empleados[2] + ", documento: "
-                            + empleados[3] + " " + empleados[4] + ", correo: " + empleados[5]);
-                    //9.Creamos una fila   dentro de la tabla para cada elemento que devuelve
-                    //el query
+                    empleados[0] = rs.getInt("nombreEmp");
+                    empleados[1] = rs.getString("apellidos");
+                    empleados[2] = rs.getString("tipoDocumento");
+                    empleados[3] = rs.getString("documento");
+                    empleados[4] = rs.getString("correo");
+                    empleados[5] = rs.getString("nombreSucursal");
                     contenidoTablaEmpleados.addRow(empleados);
-
+                    tblEmpleados.setModel(contenidoTablaEmpleados);
                 }
-                tblEmpleados.setModel(contenidoTablaEmpleados);
+                
             } catch (SQLException e) {
-                System.out.println("Error para buscar empleado ");
+                System.out.println("Error ");
                 System.out.println(e);
 
                 //<editor-fold defaultstate="collapsed" desc="comment">
@@ -450,14 +430,6 @@ public class UserMenu extends javax.swing.JFrame {
             }
         });
         jScrollPane2.setViewportView(tblEmpleados);
-        if (tblEmpleados.getColumnModel().getColumnCount() > 0) {
-            tblEmpleados.getColumnModel().getColumn(0).setHeaderValue("ID");
-            tblEmpleados.getColumnModel().getColumn(1).setHeaderValue("Nombre");
-            tblEmpleados.getColumnModel().getColumn(2).setHeaderValue("Apellido(s)");
-            tblEmpleados.getColumnModel().getColumn(3).setHeaderValue("Tipo de Documento");
-            tblEmpleados.getColumnModel().getColumn(4).setHeaderValue("Documento");
-            tblEmpleados.getColumnModel().getColumn(5).setHeaderValue("Correo");
-        }
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -663,7 +635,7 @@ public class UserMenu extends javax.swing.JFrame {
             int idSucursal = rs.getInt("idSucursal");    
             EmpleadoForm empleadoForm = new EmpleadoForm(this, true);
             empleadoForm.setVisible(true);
-            empleadoForm.recibeIdsucursal(idSucursal);
+            empleadoForm.recibesucursales(idSucursal);
             }
         }catch(SQLException e){
             System.out.println(e);
@@ -674,7 +646,7 @@ public class UserMenu extends javax.swing.JFrame {
         
         
       } else{
-             JOptionPane.showMessageDialog(this, "Para añadir in empleado debes seleccionar la Sucursal a la que pertenece", "", JOptionPane.WARNING_MESSAGE);
+             JOptionPane.showMessageDialog(this, "Para añadir un empleado debes seleccionar la Sucursal a la que pertenece", "", JOptionPane.WARNING_MESSAGE);
       }
         
     }//GEN-LAST:event_btnListarEmpleadosActionPerformed

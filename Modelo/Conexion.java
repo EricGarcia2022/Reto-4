@@ -3,6 +3,7 @@ package Modelo;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 
 public class Conexion {
@@ -35,5 +36,9 @@ public class Conexion {
     //5. Crear funcion que retorna la clase connection
     public Connection getConnection(){
         return connection;
+    }
+
+    public Statement createStatement() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }
