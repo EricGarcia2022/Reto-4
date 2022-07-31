@@ -23,7 +23,7 @@ public class ShowUserForm extends javax.swing.JDialog {
     }
 
     //1. Crear un metodo que nos permite mostar la informacion que esta en la consola
-    public void recibeDatos(int idEmp, String nombre, String apellidos, String tipoDoc, String Documento, String correo, String sucursal) {
+    public void recibeDatos(String nombre, String apellidos, String tipoDoc, String Documento, String correo, String sucursal) {
         System.out.println("sucursal: " + sucursal + "\nnombre: " + nombre + " " + apellidos + "\ndocumento: " + tipoDoc
                 + " " + "\ncorreo: " + correo);
         txtSucursal.setText(sucursal);
@@ -333,8 +333,5 @@ public class ShowUserForm extends javax.swing.JDialog {
     private javax.swing.JTextField txtdocumento;
     // End of variables declaration//GEN-END:variables
 
-    void recibeDatos(String sucursal, String nombreEmp, String apellidos, String tipoDocumento, String documento, String correo) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
+   
 }

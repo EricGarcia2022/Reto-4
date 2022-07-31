@@ -65,7 +65,7 @@ public class UserMenu extends javax.swing.JFrame {
     public void listarEmpleados() {
         String nombre = txtBuscarEmp.getText();
         if (nombre.isEmpty()) {
-            String queryConsulta ="SELECT nombreEmp,apellidos,tipoDocumento,documento,correo, nombreSucursal FROM empleado INNER JOIN sucursal ON empleado.FK_idSucursal = sucursal.idSucursal";
+            String queryConsulta ="SELECT nombreEmp,apellidos,tipoDocumento,documento,correo, FK_idSucursal FROM empleado";
             // 5. Intentar ejecutar el query y obtener una respuesta de la base de datos
             try {
                 connection = conexion.getConnection();
@@ -82,7 +82,7 @@ public class UserMenu extends javax.swing.JFrame {
                     empleados[2] = rs.getString("tipoDocumento");
                     empleados[3] = rs.getString("documento");
                     empleados[4] = rs.getString("correo");
-                    empleados[5] = rs.getString("nombreSucursal");
+                    empleados[5] = rs.getString("FK_idSucursal");
                     contenidoTablaEmpleados.addRow(empleados);
                     tblEmpleados.setModel(contenidoTablaEmpleados);
                 }
@@ -108,7 +108,7 @@ public class UserMenu extends javax.swing.JFrame {
                     empleados[2] = rs.getString("tipoDocumento");
                     empleados[3] = rs.getString("documento");
                     empleados[4] = rs.getString("correo");
-                    empleados[5] = rs.getString("nombreSucursal");
+                    empleados[5] = rs.getString("FK_idSucursal");
                     contenidoTablaEmpleados.addRow(empleados);
                     tblEmpleados.setModel(contenidoTablaEmpleados);
                 }
@@ -413,11 +413,11 @@ public class UserMenu extends javax.swing.JFrame {
 
             },
             new String [] {
-                "ID", "Nombre", "Apellido(s)", "Tipo de Documento", "Documento", "Correo"
+                "Nombre", "Apellido(s)", "Tipo de Documento", "Documento", "Correo", "Sucursal"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false
+                false, false, false, false, false, true
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -527,15 +527,15 @@ public class UserMenu extends javax.swing.JFrame {
             String tipoDocumento = tblEmpleados.getValueAt(row, 2).toString();
             String documento = tblEmpleados.getValueAt(row, 3).toString();
             String correo = tblEmpleados.getValueAt(row, 4).toString();
-            String sucursal = tblEmpleados.getValueAt(row,5).toString();
+            int  idSucursal = Integer.parseInt(tblEmpleados.getValueAt(row,5).toString());
 
-            System.out.println("idEmp: " + sucursal + "\nnombre: " + nombreEmp + " "
+            System.out.println("idEmp: " + idSucursal + "\nnombre: " + nombreEmp + " "
                     + apellidos + "\ndocumento: " + tipoDocumento + " " + documento
                     + "\ncorreo: " + correo);
             ShowUserForm showUserForm = new ShowUserForm(this, true);
             //Mediante la instancia del JDialog enviamos los datos del empleado
             //de esta vista actual a la vista que muestra la información en detalle
-            showUserForm.recibeDatos(sucursal, nombreEmp, apellidos, tipoDocumento, documento, correo);
+            showUserForm.recibeDatos(nombreEmp, apellidos, correo, documento, correo, correo);
             showUserForm.setVisible(true);
             //Para que se actualice la informacion del empleado que se acaba de editar
             //se debe borar todos los datos de la tabla y volverlos a cargar
