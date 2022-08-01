@@ -23,7 +23,7 @@ public class ShowUserForm extends javax.swing.JDialog {
     }
 
     //1. Crear un metodo que nos permite mostar la informacion que esta en la consola
-    public void recibeDatos(String nombre, String apellidos, String tipoDoc, String Documento, String correo, String sucursal) {
+    public void recibeDatos(int idEmp,String nombre, String apellidos, String tipoDoc, String Documento, String correo, String sucursal) {
         System.out.println("sucursal: " + sucursal + "\nnombre: " + nombre + " " + apellidos + "\ndocumento: " + tipoDoc
                 + " " + "\ncorreo: " + correo);
         txtSucursal.setText(sucursal);
@@ -35,7 +35,7 @@ public class ShowUserForm extends javax.swing.JDialog {
 
     }
 
-    public void ActualizarEmpleado() throws SQLException {
+    public void ActualizarEmpleado() {
         String documento = txtdocumento.getText();
         String queryIdEmpleado = "SELECT idEmp, FK_idPuestoTrabajo from empleado inner join puestoTrabajo ON(puestoTrabajo.idPuestoTrabajo = empleado.FK_idPuestoTrabajo) where documento = '" + documento + "';";
         System.out.println(queryIdEmpleado);
@@ -59,9 +59,7 @@ public class ShowUserForm extends javax.swing.JDialog {
                             + "' WHERE `idEmp` = " + idEmpleado + ";";
                     System.out.println(query);
                     try {
-                        conexion = connection.getConnection();
-                        st = connection.createStatement();
-                        st.executeUpdate(query);
+                         st.executeUpdate(query);
                         JOptionPane.showMessageDialog(this, "Se han actualizado los datos del empleado.", "", JOptionPane.INFORMATION_MESSAGE);
                         this.dispose();
                     } catch (SQLException e) {
@@ -72,6 +70,7 @@ public class ShowUserForm extends javax.swing.JDialog {
         } catch (SQLException e) {
             System.out.println(e);
         }
+        this.dispose();
     }
 
     public void EliminarEmpleado() {
@@ -256,11 +255,7 @@ public class ShowUserForm extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnActualizarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnActualizarActionPerformed
-        try {
-            ActualizarEmpleado();
-        } catch (SQLException ex) {
-            Logger.getLogger(ShowUserForm.class.getName()).log(Level.SEVERE, null, ex);
-        }
+      
     }//GEN-LAST:event_btnActualizarActionPerformed
 
     private void btnEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarActionPerformed
@@ -333,5 +328,12 @@ public class ShowUserForm extends javax.swing.JDialog {
     private javax.swing.JTextField txtdocumento;
     // End of variables declaration//GEN-END:variables
 
-   
+    void recibeDatos(String sucursal, String nombreEmp, String apellidos, String tipoDocumento, String documento, String correo) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    void recibeDatos(String nombreEmp, String apellidos, String tipoDocumento, String documento, String correo, int idSucursal) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
 }

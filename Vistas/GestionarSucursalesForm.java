@@ -1,17 +1,56 @@
 
 package Vistas;
 
+import Controlador.*;
+import Modelo.Conexion;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.ComboBoxModel;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JOptionPane;
+
+
 
 
 public class GestionarSucursalesForm extends javax.swing.JDialog {
-    
+  Conexion conexion = new Conexion();
+    Connection connection;
+    Statement st;
+    ResultSet rs;    
+   
   
 
-    public GestionarSucursalesForm(java.awt.Frame parent, boolean modal) {
+public GestionarSucursalesForm(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
     }
-
+public void recibirdatosSucursal (int idSucursal){
+    
+    String queryDireccion = "SELECT nombreSucursal, nombreDepartamento, zona, tipoCalle, numero1, numero2, numero3 FROM `sucursal` INNER JOIN `direccion` WHERE FK_idDireccion = idDireccion AND idSucursal = \"+ idSucursal+\";";
+    System.out.println(queryDireccion);
+    try{
+        connection = conexion.getConnection();
+        st = connection.createStatement();
+        rs = st.executeQuery(queryDireccion);
+        while (rs.next()){
+            txtSucursal.setText(rs.getString("nombreSucursal"));
+            txtNum1.setText(rs.getString("numero1"));
+            txtNum2.setText(rs.getString("numero2"));
+            txtNum3.setText(rs.getString("numero3"));
+            
+        }
+        
+        
+    } catch (SQLException ex) {
+          Logger.getLogger(GestionarSucursalesForm.class.getName()).log(Level.SEVERE, null, ex);
+      }
+    
+}
+        
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -24,7 +63,7 @@ public class GestionarSucursalesForm extends javax.swing.JDialog {
         cbDepartamentos = new javax.swing.JComboBox<>();
         cbZona = new javax.swing.JComboBox<>();
         jLabel4 = new javax.swing.JLabel();
-        jComboBox1 = new javax.swing.JComboBox<>();
+        cbCalle = new javax.swing.JComboBox<>();
         jLabel5 = new javax.swing.JLabel();
         txtNum1 = new javax.swing.JTextField();
         txtNum2 = new javax.swing.JTextField();
@@ -85,7 +124,7 @@ public class GestionarSucursalesForm extends javax.swing.JDialog {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(jLabel4)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jComboBox1, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addComponent(cbCalle, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addComponent(txtNum1, javax.swing.GroupLayout.PREFERRED_SIZE, 67, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(18, 18, 18)
@@ -117,7 +156,7 @@ public class GestionarSucursalesForm extends javax.swing.JDialog {
                     .addComponent(jLabel3)
                     .addComponent(cbZona, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel4)
-                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(cbCalle, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(31, 31, 31)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel5)
@@ -192,9 +231,9 @@ public class GestionarSucursalesForm extends javax.swing.JDialog {
     private javax.swing.JButton btnActualizar;
     private javax.swing.JButton btnCancelar;
     private javax.swing.JButton btnEliminar;
+    private javax.swing.JComboBox<String> cbCalle;
     private javax.swing.JComboBox<String> cbDepartamentos;
     private javax.swing.JComboBox<String> cbZona;
-    private javax.swing.JComboBox<String> jComboBox1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
