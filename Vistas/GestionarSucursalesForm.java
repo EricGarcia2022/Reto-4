@@ -17,39 +17,16 @@ import javax.swing.JOptionPane;
 
 
 public class GestionarSucursalesForm extends javax.swing.JDialog {
-  Conexion conexion = new Conexion();
-    Connection connection;
-    Statement st;
-    ResultSet rs;    
-   
-  
 
+    ComboBoxModel enumDepartamentos, enumTipoCalles, enumZonas;
+    
 public GestionarSucursalesForm(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
+        enumDepartamentos = new DefaultComboBoxModel(EnumDepartamento.values());
+        enumTipoCalles = new DefaultComboBoxModel(EnumTipoCalle.values());
+        enumZonas = new DefaultComboBoxModel(EnumTipoZona.values());
         initComponents();
     }
-public void recibirdatosSucursal (int idSucursal){
-    
-    String queryDireccion = "SELECT nombreSucursal, nombreDepartamento, zona, tipoCalle, numero1, numero2, numero3 FROM `sucursal` INNER JOIN `direccion` WHERE FK_idDireccion = idDireccion AND idSucursal = \"+ idSucursal+\";";
-    System.out.println(queryDireccion);
-    try{
-        connection = conexion.getConnection();
-        st = connection.createStatement();
-        rs = st.executeQuery(queryDireccion);
-        while (rs.next()){
-            txtSucursal.setText(rs.getString("nombreSucursal"));
-            txtNum1.setText(rs.getString("numero1"));
-            txtNum2.setText(rs.getString("numero2"));
-            txtNum3.setText(rs.getString("numero3"));
-            
-        }
-        
-        
-    } catch (SQLException ex) {
-          Logger.getLogger(GestionarSucursalesForm.class.getName()).log(Level.SEVERE, null, ex);
-      }
-    
-}
         
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -84,6 +61,10 @@ public void recibirdatosSucursal (int idSucursal){
 
         jLabel3.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
         jLabel3.setText("Zona");
+
+        cbDepartamentos.setModel(enumTipoDepartamentos);
+
+        cbZona.setModel(enumTipoCalles);
 
         jLabel4.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
         jLabel4.setText("Calle");
