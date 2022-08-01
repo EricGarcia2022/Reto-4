@@ -64,8 +64,8 @@ public class UserMenu extends javax.swing.JFrame {
     // 4. Metodo que trae todos los empleados existentes en la base de datos
     public void listarEmpleados() {
         String nombre = txtBuscarEmp.getText();
-        if (nombre.isEmpty()) {
-            String queryConsulta ="SELECT nombreEmp,apellidos,tipoDocumento,documento,correo, FK_idSucursal FROM empleado";
+            if (nombre.isEmpty()) {
+            String queryConsulta ="SELECT nombreEmp,apellidos,tipoDocumento,documento,correo,nombreSucursal FROM empleado INNER JOIN sucursal WHERE empleado.FK_idSucursal = sucursal.idSucursal";
             // 5. Intentar ejecutar el query y obtener una respuesta de la base de datos
             try {
                 connection = conexion.getConnection();
@@ -82,7 +82,7 @@ public class UserMenu extends javax.swing.JFrame {
                     empleados[2] = rs.getString("tipoDocumento");
                     empleados[3] = rs.getString("documento");
                     empleados[4] = rs.getString("correo");
-                    empleados[5] = rs.getString("FK_idSucursal");
+                    empleados[5] = rs.getString("nombreSucursal");
                     contenidoTablaEmpleados.addRow(empleados);
                     tblEmpleados.setModel(contenidoTablaEmpleados);
                 }
@@ -93,7 +93,7 @@ public class UserMenu extends javax.swing.JFrame {
             }
 
         } else {
-            String queryConsulta =  "SELECT nombreEmp,apellidos,tipoDocumento,documento,correo, nombreSucursal FROM empleado INNER JOIN sucursal WHERE empleado.FK_idSucursal = sucursal.idSucursal AND nombreEmp LIKE '%" + txtBuscarEmp + "%' OR apellidos LIKE '%" + txtBuscarEmp + "%'";
+            String queryConsulta =  "SELECT nombreEmp,apellidos,tipoDocumento,documento,correo,nombreSucursal FROM empleado INNER JOIN sucursal WHERE empleado.FK_idSucursal = sucursal.idSucursal AND nombreEmp LIKE '%" + txtBuscarEmp + "%' OR apellidos LIKE '%" + txtBuscarEmp + "%'";
             System.out.println(queryConsulta);
             try {
                 connection = conexion.getConnection();
@@ -108,7 +108,7 @@ public class UserMenu extends javax.swing.JFrame {
                     empleados[2] = rs.getString("tipoDocumento");
                     empleados[3] = rs.getString("documento");
                     empleados[4] = rs.getString("correo");
-                    empleados[5] = rs.getString("FK_idSucursal");
+                    empleados[5] = rs.getString("nombreSucursal");
                     contenidoTablaEmpleados.addRow(empleados);
                     tblEmpleados.setModel(contenidoTablaEmpleados);
                 }
@@ -528,7 +528,7 @@ public class UserMenu extends javax.swing.JFrame {
             String documento = tblEmpleados.getValueAt(row, 3).toString();
             String correo = tblEmpleados.getValueAt(row, 4).toString();
             int  idSucursal = Integer.parseInt(tblEmpleados.getValueAt(row,5).toString());
-
+                       
             System.out.println("idEmp: " + idSucursal + "\nnombre: " + nombreEmp + " "
                     + apellidos + "\ndocumento: " + tipoDocumento + " " + documento
                     + "\ncorreo: " + correo);
