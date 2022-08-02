@@ -562,10 +562,35 @@ public class UserMenu extends javax.swing.JFrame {
             String departamento = tblDepartamentos.getValueAt(row, 1).toString();
             String query = "SELECT idDireccion FROM  `direccion` INNER JOIN sucursal WHERE direccion.idDireccion = sucursal.FK_idDireccion AND sucursal.nombreSucursal = '" + sucursal + "';";
             System.out.println(query);
-            try{
-                
-            }catch(SQLException){
-                
+            try {
+                connection = conexion.getConnection();
+                st = connection.createStatement();
+                rs = st.executeQuery(query);
+                while (rs.next()) {
+                    int idDireccion = rs.getInt("idDireccion");
+                    System.out.println("id capturados: " + idDireccion);
+                    String queryDireccion = "SELECT zona, tipoCalle, numero1,numero2, numero3 FROM `direccion` WHERE idDireccion = " + idDireccion + ";";
+                    try {
+                        rs = st.executeQuery(queryDireccion);
+                        while (rs.next()) {
+                            String zona = rs.getString("zona");
+                            String tipocalle = rs.getString("tipocalle");
+                            String numero1 = rs.getString("numero1");
+                            String numero2 = rs.getString("numero2");
+                            String numero3 = rs.getString("numero3");
+                            GestionarSucursalesForm gestionarSucursales = new GestionarSucursalesForm(this, true);
+                            System.out.println(sucursal + " " + departamento + " " + zona + " " + tipocalle + " " + numero1 + " " + numero2 + " " + numero3 + " " );
+                            gestionarSucursales.setVisible(true);
+                        }
+                    } catch (SQLException e) {
+                        System.out.println(e);
+                    }
+
+                }
+
+            } catch (SQLException e) {
+                System.out.println(e);
+
             }
         }
 
