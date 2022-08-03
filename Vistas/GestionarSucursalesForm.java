@@ -1,15 +1,22 @@
 package Vistas;
 
 import Controlador.*;
-import javax.swing.ComboBoxModel;
-import javax.swing.DefaultComboBoxModel;
 import Modelo.Conexion;
 import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import javax.swing.ComboBoxModel;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JOptionPane;
 
 public class GestionarSucursalesForm extends javax.swing.JDialog {
 
     ComboBoxModel enumDepartamentos, enumTipoCalles, enumZonas;
-    private ComboBoxModel<String> enumTipoDepartamentos;
+    Conexion conexion = new Conexion();
+    Connection connection;
+    Statement st;
+    ResultSet rs;
 
     public GestionarSucursalesForm(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
@@ -17,33 +24,104 @@ public class GestionarSucursalesForm extends javax.swing.JDialog {
         enumTipoCalles = new DefaultComboBoxModel(EnumTipoCalle.values());
         enumZonas = new DefaultComboBoxModel(EnumTipoZona.values());
         initComponents();
+        this.setLocationRelativeTo(parent);
     }
 
-    public void recibirDatosSucursales(int idSucursal, String sucursal, String Departamento, String numero1, String numero2, String numero3, Object zona, Object tipoCalle) {
-        String queryDireccion = "SELECT nombreSucursal,nombreDepartamento,zona,tipoCalle, numero1,numero2,numero3 FROM `sucursal` INNER JOIN `direccion` WHERE FK_idDireccion = idDireccion AND idSucursal = " + idSucursal + ";";
-        System.out.println(queryDireccion);
-        enumDepartamentos.setSelectedItem(Departamento);
+    public void recibirDatosSucursales(int idDireccion, String sucursal, String departamento, String zona, String tipocalle, String numero1, String numero2, String numero3) {
+        System.out.println("Recibiendo desde UserForm: " + idDireccion + " " + sucursal + " " + departamento + " " + zona + " " + tipocalle + " " + numero1 + " " + numero2 + " " + numero3);
+        enumDepartamentos.setSelectedItem(departamento);
         enumZonas.setSelectedItem(zona);
-        enumTipoCalles.setSelectedItem(tipoCalle);
-
+        enumTipoCalles.setSelectedItem(tipocalle);
         txtSucursal.setText(sucursal);
-        txtNum1.setText(sucursal);
-        txtNum2.setText(sucursal);
-        txtNum3.setText(sucursal);
+        txtNum1.setText(numero1);
+        txtNum2.setText(numero2);
+        txtNum3.setText(numero3);
 
     }
 
     public void actualizarSucursalDireccion() {
-        String sucursal = txtNuevaSucursal.getText();
+        String sucursal = txtSucursal.getText();
         String departamento = cbDepartamentos.getSelectedItem().toString();
         String zona = cbZona.getSelectedItem().toString();
-        String tipoCalle = cbTipoCalle.getSelectedItem().toString();
-        String nuevaSucursal = txtSucursal.getText();
+        String tipocalle = cbTipoCalle.getSelectedItem().toString();
+        String nuevaSucursal = txtNuevaSucursal.getText();
         String numero1 = txtNum1.getText();
-        String numero2 = txtNum1.getText();
-        String numero3 = txtNum1.getText();
-        
-        String queryActualizar = "SELECT idSucursal FROM `sucursal` INNER JOIN `direccion` WHERE FK_idDireccion = idDireccion AND nombreSucursal = '"+sucursal+"';";
+        String numero2 = txtNum2.getText();
+        String numero3 = txtNum3.getText();
+        String queryIdDireccion = "SELECT idDireccion FROM direccion INNER JOIN sucursal WHERE direccion.idDireccion = sucursal.FK_idDireccion AND sucursal.nombreSucursal = '" + sucursal + "';";
+        try {
+            connection = conexion.getConnection();
+            st = connection.createStatement();
+            rs = st.executeQuery(queryIdDireccion);
+            while (rs.next()) {
+                int idDireccion = rs.getInt("idDireccion");
+                String queryActualizar = "UPDATE `direccion` SET `zona`='" + zona + "',`tipoCalle`='" + tipocalle + "',`numero1`= '" + numero1 + "',`numero2`='" + numero2 + "',`numero3`='" + numero3 + "',`nombreDepartamento`='" + departamento + "' WHERE idDireccion = " + idDireccion + ";";
+                System.out.println(queryActualizar);
+                try {
+                    st.executeUpdate(queryActualizar);
+                    JOptionPane.showMessageDialog(this, "Se actualizo la informacion");
+                    this.dispose();
+                } catch (SQLException e) {
+                    System.out.println(e);
+                }
+
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        if (!nuevaSucursal.isEmpty()) {
+            String queryIdSucursal = "SELECT  idSucursal FROM `sucursal`  INNER JOIN direccion ON sucursal.FK_idDireccion = direccion.idDireccion AND sucursal.nombreSucursal ='" + sucursal + "';";
+            System.out.println(queryIdSucursal);
+            try {
+                connection = conexion.getConnection();
+                st = connection.createStatement();
+                rs = st.executeQuery(queryIdSucursal);
+                while (rs.next()) {
+                    int idSucursal = rs.getInt("idSucursal");
+                    String queryActualizarSucursal = "UPDATE `sucursal` SET `nombreSucursal`='" + nuevaSucursal + "' WHERE idSucursal = " + idSucursal + ";";
+                    try {
+                        st.executeUpdate(queryActualizarSucursal);
+                    } catch (SQLException e) {
+                        System.out.println(e);
+
+                    }
+                }
+
+            } catch (SQLException e) {
+                System.out.println(e);
+
+            }
+        }
+
+    }
+    public void eliminarSucursalDireccion(){
+         String sucursal = txtSucursal.getText();
+        String queryIdDireccion = "SELECT  idDireccion,idSucursal FROM `sucursal`  INNER JOIN direccion ON sucursal.FK_idDireccion = direccion.idDireccion AND sucursal.nombreSucursal ='" + sucursal + "';";
+            System.out.println(queryIdDireccion);
+            try {
+                connection = conexion.getConnection();
+                st = connection.createStatement();
+                rs = st.executeQuery(queryIdDireccion);
+                while (rs.next()) {
+                int idDireccion = rs.getInt("idDireccion");
+                int idSucursal = rs.getInt("idSucursal");
+                String queryEliminarSucursal = "DELETE FROM `sucursal` WHERE idSucursal ="+ idSucursal +";";
+                String queryEliminarDireccion = "DELETE FROM `direccion` WHERE idDireccion = " +idDireccion + ";";
+                try{
+                    st.executeUpdate(queryEliminarDireccion);
+                    st.executeUpdate(queryEliminarSucursal);
+                    this.dispose();
+                    
+                }catch(SQLException e){
+                    System.out.println(e);
+                }
+                    
+                }
+                    
+                }catch(SQLException e){
+                    System.out.println(e);
+                    
+                }
     }
 
     @SuppressWarnings("unchecked")
@@ -63,7 +141,7 @@ public class GestionarSucursalesForm extends javax.swing.JDialog {
         txtNum1 = new javax.swing.JTextField();
         txtNum2 = new javax.swing.JTextField();
         txtNum3 = new javax.swing.JTextField();
-        btnActualizar = new javax.swing.JButton();
+        btnEditar = new javax.swing.JButton();
         btnEliminar = new javax.swing.JButton();
         btnCancelar = new javax.swing.JButton();
         jLabel6 = new javax.swing.JLabel();
@@ -94,9 +172,19 @@ public class GestionarSucursalesForm extends javax.swing.JDialog {
         jLabel5.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
         jLabel5.setText("#No.");
 
-        btnActualizar.setText("Actualizar");
+        btnEditar.setText("Actualizar");
+        btnEditar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEditarActionPerformed(evt);
+            }
+        });
 
         btnEliminar.setText("Eliminar");
+        btnEliminar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEliminarActionPerformed(evt);
+            }
+        });
 
         btnCancelar.setText("Cancelar");
 
@@ -125,7 +213,6 @@ public class GestionarSucursalesForm extends javax.swing.JDialog {
                                     .addComponent(cbTipoCalle, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE))
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addGroup(jPanel1Layout.createSequentialGroup()
-                                        .addGap(0, 0, 0)
                                         .addComponent(jLabel3)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                         .addComponent(cbZona, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -147,7 +234,7 @@ public class GestionarSucursalesForm extends javax.swing.JDialog {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                 .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(btnActualizar)
+                .addComponent(btnEditar)
                 .addGap(30, 30, 30)
                 .addComponent(btnEliminar)
                 .addGap(42, 42, 42)
@@ -183,7 +270,7 @@ public class GestionarSucursalesForm extends javax.swing.JDialog {
                     .addComponent(txtNum3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 34, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnActualizar)
+                    .addComponent(btnEditar)
                     .addComponent(btnEliminar)
                     .addComponent(btnCancelar))
                 .addGap(60, 60, 60))
@@ -203,9 +290,14 @@ public class GestionarSucursalesForm extends javax.swing.JDialog {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    /**
-     * @param args the command line arguments
-     */
+    private void btnEditarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEditarActionPerformed
+        actualizarSucursalDireccion();
+    }//GEN-LAST:event_btnEditarActionPerformed
+
+    private void btnEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarActionPerformed
+    eliminarSucursalDireccion();
+    }//GEN-LAST:event_btnEliminarActionPerformed
+
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
@@ -246,8 +338,8 @@ public class GestionarSucursalesForm extends javax.swing.JDialog {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnActualizar;
     private javax.swing.JButton btnCancelar;
+    private javax.swing.JButton btnEditar;
     private javax.swing.JButton btnEliminar;
     private javax.swing.JComboBox<String> cbDepartamentos;
     private javax.swing.JComboBox<String> cbTipoCalle;
@@ -265,4 +357,5 @@ public class GestionarSucursalesForm extends javax.swing.JDialog {
     private javax.swing.JTextField txtNum3;
     private javax.swing.JTextField txtSucursal;
     // End of variables declaration//GEN-END:variables
+
 }

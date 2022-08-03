@@ -506,7 +506,7 @@ public class UserMenu extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jTabbedPane8)
-                .addGap(211, 211, 211))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -579,8 +579,10 @@ public class UserMenu extends javax.swing.JFrame {
                             String numero2 = rs.getString("numero2");
                             String numero3 = rs.getString("numero3");
                             GestionarSucursalesForm gestionarSucursales = new GestionarSucursalesForm(this, true);
-                            System.out.println(sucursal + " " + departamento + " " + zona + " " + tipocalle + " " + numero1 + " " + numero2 + " " + numero3 + " " );
+                            gestionarSucursales.recibirDatosSucursales(idDireccion,sucursal,departamento,zona,tipocalle,numero1,numero2,numero3);
                             gestionarSucursales.setVisible(true);
+                            this.borrarDatosTabla();
+                            this.listarDepartamentos();
                         }
                     } catch (SQLException e) {
                         System.out.println(e);
